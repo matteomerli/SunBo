@@ -1,47 +1,51 @@
-!DOCTYPE html
-html
-head
-  titleSunBo — Sunny Cafés in Bolognatitle
-  meta charset=utf-8 
-  meta name=viewport content=width=device-width, initial-scale=1.0
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SunBo — Sunny Cafés in Bologna</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  !-- Leaflet CSS --
-  link rel=stylesheet href=httpsunpkg.comleafletdistleaflet.css 
-  style
-    body, html { margin 0; padding 0; height 100%; }
-    #map { height 100vh; }
-  style
-head
-body
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body, html { margin: 0; padding: 0; height: 100%; }
+    #map { height: 100vh; }
+  </style>
+</head>
+<body>
 
-div id=mapdiv
+<div id="map"></div>
 
-!-- Leaflet and SunCalc --
-script src=httpsunpkg.comleafletdistleaflet.jsscript
-script src=httpsunpkg.comsuncalcsuncalc.jsscript
+<!-- Leaflet and SunCalc -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/suncalc/suncalc.js"></script>
 
-script
+<script>
   const map = L.map('map').setView([44.4949, 11.3426], 16);
 
-  L.tileLayer('https{s}.tile.openstreetmap.org{z}{x}{y}.png', {
-    attribution '© OpenStreetMap contributors'
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
   }).addTo(map);
 
-   Bologna center coordinates
+  // Bologna center coordinates
   const lat = 44.4949;
   const lng = 11.3426;
 
   const now = new Date();
   const sunPos = SunCalc.getPosition(now, lat, lng);
 
-  const azimuth = sunPos.azimuth  180  Math.PI + 180;  degrees
-  const altitude = sunPos.altitude  180  Math.PI;
+  const azimuth = sunPos.azimuth * 180 / Math.PI + 180; // degrees
+  const altitude = sunPos.altitude * 180 / Math.PI;
 
   L.marker([lat, lng])
     .addTo(map)
-    .bindPopup(`SunBo — Sunny spot in BolognabrSun azimuth ${azimuth.toFixed(2)}°brSun altitude ${altitude.toFixed(2)}°`)
+    .bindPopup(`SunBo — Sunny spot in Bologna<br>Sun azimuth: ${azimuth.toFixed(2)}°<br>Sun altitude: ${altitude.toFixed(2)}°`)
     .openPopup();
-script
+</script>
+
+</body>
+</html>
+
 
 body
 html
