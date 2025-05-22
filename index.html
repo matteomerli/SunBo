@@ -43,5 +43,86 @@
     .openPopup();
 </script>
 
+  <script>
+    // Your map initialization code here
+    const map = L.map('map').setView([44.4949, 11.3426], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+  </script>
+  
+  <script>
+  function getHeight(props) {
+    if (props.height) return parseFloat(props.height);
+    if (props['building:levels']) return parseFloat(props['building:levels']) * 3; // assume ~3m per floor
+    return 10; // fallback default
+  }
+
+  function projectShadows(geojson, sunAzimuth, sunAltitude) {
+    const shadowLayer = L.geoJSON(null, {
+      style: {
+        color: 'black',
+        weight: 0,
+        fillColor: 'black',
+        fillOpacity: 0.3
+      }
+    }).addTo(map);
+
+    geojson.features.forEach(feature => {
+      const coords = feature.geometry.coordinates[0];
+      const shadowCoords = [];
+
+      const props = feature.properties;
+      const height = getHeight(props);
+      const shadowLength = height / Math.tan(sunAltitude); // meters
+
+      coords.forEach(coord => {
+        const [lng, lat] = coord;
+
+        const dx = shadowLength * Math.sin(sunAzimuth);
+        const dy = shadowLength * Math.cos(sunAzimuth);
+
+        const latOffset = dy / 111320;
+        const lngOffset = dx / (40075000 * Math.cos(lat * Math.PI / 180) / 360);
+
+        shadowCoords.push([
+          lng + lngOffset,
+          lat + latOffset
+        ]);
+      });
+
+      const fullPolygon = [...coords, ...shadowCoords.reverse()];
+
+      shadowLayer.addData({
+        type: 'Feature',
+        geometry: {
+          type: 'Polygon',
+          coordinates: [fullPolygon]
+        }
+      });
+    });
+  }
+
+  const lat = 44.4949, lng = 11.3426;
+  const sun = SunCalc.getPosition(new Date(), lat, lng);
+  const azimuth = sun.azimuth;
+  const altitude = sun.altitude;
+
+  fetch('buildings.geojson')
+    .then(res => res.json())
+    .then(data => {
+      L.geoJSON(data, {
+        style: {
+          color: '#444',
+          weight: 1,
+          fillOpacity: 0.1
+        }
+      }).addTo(map);
+
+      projectShadows(data, azimuth, altitude);
+    });
+</script>
+
+
 </body>
 </html>
